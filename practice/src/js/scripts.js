@@ -1,8 +1,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
+import { DirectionalLight } from 'three';
 
 const renderer = new THREE.WebGLRenderer();
+renderer.shadowMap.enabled = true;
 renderer.setSize(window.innerWidth, window.innerHeight);
 // 캔버스
 document.body.appendChild(renderer.domElement);
@@ -30,16 +32,17 @@ orbit.update()
 
 // 박스 개체
 const boxGeometry = new THREE.BoxGeometry();
-const boxMaterial = new THREE.MeshBasicMaterial({ color: 0x00FFF0 });
+const boxMaterial = new THREE.MeshStandardMaterial({ color: 0x00FFF0 });
 const box = new THREE.Mesh(boxGeometry, boxMaterial);
 scene.add(box);
 
 // 평면 개체
 const planeGeometry = new THREE.PlaneGeometry(30, 30);
-const planeMaterial = new THREE.MeshBasicMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide });
+const planeMaterial = new THREE.MeshStandardMaterial({ color: 0xFFFFFF, side: THREE.DoubleSide });
 const plane = new THREE.Mesh(planeGeometry, planeMaterial);
 scene.add(plane);
 plane.rotation.x = -0.5 * Math.PI;
+plane.receiveShadow = true;
 
 // 평면 위치
 const gridHelper = new THREE.GridHelper(30);
@@ -47,14 +50,23 @@ scene.add(gridHelper);
 
 // 구 개체
 const sphereGeometry = new THREE.SphereGeometry(4, 50, 50);
-const sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x0000FF, wireframe: false }); // basic: 빛에 영향을 받지 않는다.
+const sphereMaterial = new THREE.MeshStandardMaterial({ color: 0x0000FF, wireframe: false }); // basic: 빛에 영향을 받지 않는다.
 const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
 scene.add(sphere);
-
 sphere.position.set(-10, 10, 0);
+sphere.castShadow = true;
 
-const ambientLight = new THREE.AmbientLight(0xFFFFFF);
+const ambientLight = new THREE.AmbientLight(0x333333);
 scene.add(ambientLight);
+
+const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.8);
+scene.add(directionalLight);
+directionalLight.position.set(-30, 50, 0);
+directionalLight.castShadow = true;
+
+// directLight 위치를 표시해주는 helper
+const dLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
+scene.add(dLightHelper);
 
 const gui = new dat.GUI();
 const options = {
