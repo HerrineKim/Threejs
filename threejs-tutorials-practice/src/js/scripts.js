@@ -56,23 +56,51 @@ scene.add(sphere);
 sphere.position.set(-10, 10, 0);
 sphere.castShadow = true;
 
+// AmbientLight
 const ambientLight = new THREE.AmbientLight(0x333333);
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.8);
-scene.add(directionalLight);
-directionalLight.position.set(-30, 50, 0);
-directionalLight.castShadow = true;
+// // DirectionalLight
+// const directionalLight = new THREE.DirectionalLight(0xFFFFFF, 0.8);
+// scene.add(directionalLight);
+// directionalLight.position.set(-30, 50, 0);
+// directionalLight.castShadow = true;
+// directionalLight.shadow.camera.bottom = -12;
+// // directLight 위치를 표시해주는 helper
+// const dLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
+// scene.add(dLightHelper);
+// // directLight의 shadow 위치를 표시해주는 helper
+// const dLightShadowHelper = new THREE.CameraHelper(directionalLight.shadow.camera);
+// scene.add(dLightShadowHelper);
 
-// directLight 위치를 표시해주는 helper
-const dLightHelper = new THREE.DirectionalLightHelper(directionalLight, 5);
-scene.add(dLightHelper);
+// SpotLight
+// spotLight 클래스의 인스턴스를 선언한다.
+const spotLight = new THREE.SpotLight(0xFFFFFF);
+scene.add(spotLight);
+spotLight.position.set(-100, 100, 0);
+// 앵글이 너무 넓으면 그림자가 pixel화 되어 보인다.
+spotLight.castShadow = true;
+spotLight.angle = 0.2;
+// spotLight helper
+const sLightHelper = new THREE.SpotLightHelper(spotLight);
+scene.add(sLightHelper);
+
+// 배경색 설정
+renderer.setClearColor(0xFFEA00);
+
+// Fog: 멀어질수록 화면에 안개가 낀다. 
+scene.fog = new THREE.Fog(0xFFFFFF, 0, 200);
+// 멀어질수록 기하급수적으로 흐려지는 Fog
+// scene.fog = new THREE.FogExp2(0xFFFFFF, 0.01);
 
 const gui = new dat.GUI();
 const options = {
   sphereColor: '#FFEA00',
   wireframe: false,
-  speed: 0.01
+  speed: 0.01,
+  angle: 0.2,
+  penumbra: 0,
+  intensity: 0.1,
 }
 
 gui.addColor(options, 'sphereColor').onChange(function (e) {
@@ -84,9 +112,11 @@ gui.add(options, 'wireframe').onChange(function (e) {
 });
 
 gui.add(options, 'speed', 0, 0.1);
+gui.add(options, 'angle', 0, 1);
+gui.add(options, 'penumbra', 0, 1);
+gui.add(options, 'intensity', 0, 1);
 
 let step = 0;
-
 
 // 자동으로 돌아가는 애니메이션
 function animate(time) {
@@ -95,6 +125,13 @@ function animate(time) {
 
   step += options.speed;
   sphere.position.y = 10 * Math.abs(Math.sin(step));
+
+  spotLight.angle = options.angle;
+  spotLight.penumbra = options.penumbra;
+  spotLight.intensity = options.intensity;
+  // light의 property가 변경되면 helper도 꼭 업데이트 해주어야 한다.
+  sLightHelper.update();
+
   renderer.render(scene, camera);
 }
 
