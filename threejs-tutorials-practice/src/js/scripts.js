@@ -3,6 +3,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import * as dat from 'dat.gui';
 import { DirectionalLight } from 'three';
 
+import nebula from '../img/nebula.jpg';
+import stars from '../img/stars.jpg';
+
 const renderer = new THREE.WebGLRenderer();
 renderer.shadowMap.enabled = true;
 renderer.setSize(window.innerWidth, window.innerHeight);
@@ -86,10 +89,37 @@ const sLightHelper = new THREE.SpotLightHelper(spotLight);
 scene.add(sLightHelper);
 
 // 배경색 설정
-renderer.setClearColor(0xFFEA00);
+// renderer.setClearColor(0xFFEA00);
+
+// 배경 이미지 설정
+const textureLoader = new THREE.TextureLoader();
+// scene.background = textureLoader.load(stars);
+const cubeTextureLoader = new THREE.CubeTextureLoader();
+scene.background = cubeTextureLoader.load([
+  nebula, nebula, stars, stars, stars, stars
+]);
+
+// 개체에 texture 적용하기
+const box2Geometry = new THREE.BoxGeometry(4, 4, 4);
+const box2Material = new THREE.MeshStandardMaterial({
+  // color: 0x00FF00,
+  // map: textureLoader.load(nebula)
+});
+const box2MultiMaterial = [
+  new THREE.MeshStandardMaterial({ map: textureLoader.load(stars) }),
+  new THREE.MeshStandardMaterial({ map: textureLoader.load(stars) }),
+  new THREE.MeshStandardMaterial({ map: textureLoader.load(nebula) }),
+  new THREE.MeshStandardMaterial({ map: textureLoader.load(stars) }),
+  new THREE.MeshStandardMaterial({ map: textureLoader.load(nebula) }),
+  new THREE.MeshStandardMaterial({ map: textureLoader.load(stars) }),
+]
+const box2 = new THREE.Mesh(box2Geometry, box2MultiMaterial);
+scene.add(box2);
+box2.position.set(0, 15, 10);
+box2.material.map = textureLoader.load(nebula);
 
 // Fog: 멀어질수록 화면에 안개가 낀다. 
-scene.fog = new THREE.Fog(0xFFFFFF, 0, 200);
+// scene.fog = new THREE.Fog(0xFFFFFF, 0, 200);
 // 멀어질수록 기하급수적으로 흐려지는 Fog
 // scene.fog = new THREE.FogExp2(0xFFFFFF, 0.01);
 
